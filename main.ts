@@ -69,10 +69,10 @@ namespace IR {
      */
     //% blockId=sendMyMessage1 block="send message: %msg| ,%times| times, encoding type:%myType"
     //% weight=80 blockGap=10
-    export function sendMyMessage1(msg: string, times: number, myType: encodingType): void {
+    export function sendMyMessage1(msg: number, times: number, myType: encodingType): void {
         if (send_init) {
             //control.inBackground(() => {
-            sendMessage(convertHexStrToNum(msg), times, myType);
+            sendMessage(msg, times, myType);
             //})
         }
     }
