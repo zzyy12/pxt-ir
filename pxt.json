@@ -10,7 +10,9 @@
         "README.md",
         "main.ts",
         "_locales/zh/IR-strings.json",
-        "_locales/de/IR-strings.json"
+        "_locales/de/IR-strings.json",
+        "pxt-IR.ts"
     ],
-    "public": true
+    "public": true,
+    "preferredEditor": "tsprj"
 }
