@@ -18,6 +18,7 @@ namespace IR {
     let first = true
     let rec_Type = ""
     let messageStr = ""
+    let messagehh = 0
     let recPin = DigitalPin.P8
     let thereIsHandler = false
     arr = []
@@ -295,8 +296,9 @@ namespace IR {
      */
     //% blockId=getMessage block="the received IR message"
     //% weight=60 blockGap=10
-    export function getMessage(): string {
-        return messageStr
+    export function getMessage(): number {
+        messagehh = convertHexStrToNum(messageStr)
+        return messagehh
     }
 
 }
