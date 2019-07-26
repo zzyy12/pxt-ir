@@ -18,7 +18,6 @@ namespace IR {
     let first = true
     let rec_Type = ""
     let messageStr = ""
-    let messagehh = 0
     let recPin = DigitalPin.P8
     let thereIsHandler = false
     arr = []
@@ -70,10 +69,10 @@ namespace IR {
      */
     //% blockId=sendMyMessage1 block="send message: %msg| ,%times| times, encoding type:%myType"
     //% weight=80 blockGap=10
-    export function sendMyMessage1(msg: number, times: number, myType: encodingType): void {
+    export function sendMyMessage1(msg: string, times: number, myType: encodingType): void {
         if (send_init) {
             //control.inBackground(() => {
-            sendMessage(msg, times, myType);
+            sendMessage(convertHexStrToNum(msg), times, myType);
             //})
         }
     }
@@ -82,12 +81,12 @@ namespace IR {
      */
     //% blockId=sendMyMessage2 block="send message: %msg| ,%times| times, encoding type:%myType"
     //% weight=75 blockGap=10
-    export function sendMyMessage2(msg: number, times: number, myType: string): void {
+    export function sendMyMessage2(msg: string, times: number, myType: string): void {
         if (send_init) {
             if (myType == "NEC") {
-                sendMessage(msg, times, encodingType.NEC);
+                sendMessage(convertHexStrToNum(msg), times, encodingType.NEC);
             } else if (myType == "SONY") {
-                sendMessage(msg, times, encodingType.SONY);
+                sendMessage(convertHexStrToNum(msg), times, encodingType.SONY);
             }
         }
     }
@@ -210,7 +209,6 @@ namespace IR {
         let addr = 0
         let command = 0
         messageStr = ""
-        messagehh = 0
         rec_Type = ""
         for (let i = 0; i <= arr.length - 1 - 1; i++) {
             arr[i] = arr[i + 1] - arr[i]
@@ -222,7 +220,6 @@ namespace IR {
             addr = pulseToDigit(0, 15, 1600)
             command = pulseToDigit(16, 31, 1600)
             messageStr = convertNumToHexStr(addr, 4) + convertNumToHexStr(command, 4)
-            messagehh = addr + command
             arr = [];
             if (thereIsHandler) {
                 tempHandler();
@@ -233,7 +230,6 @@ namespace IR {
             arr.removeAt(0)
             command = pulseToDigit(0, 11, 1300)
             messageStr = convertNumToHexStr(command, 3)
-            messagehh = command
             arr = [];
             if (thereIsHandler) {
                 tempHandler();
@@ -299,8 +295,8 @@ namespace IR {
      */
     //% blockId=getMessage block="the received IR message"
     //% weight=60 blockGap=10
-    export function getMessage(): number {
-        return messagehh
+    export function getMessage(): string {
+        return messageStr
     }
 
 }
