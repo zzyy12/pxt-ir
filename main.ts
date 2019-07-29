@@ -18,6 +18,7 @@ namespace IR {
     let first = true
     let rec_Type = ""
     let messageStr = ""
+    let command1 = 0
     let recPin = DigitalPin.P8
     let thereIsHandler = false
     arr = []
@@ -208,7 +209,7 @@ namespace IR {
     function decodeIR() {
         let addr = 0
         let command = 0
-		let command1 = 0
+		
         messageStr = ""
         rec_Type = ""
         for (let i = 0; i <= arr.length - 1 - 1; i++) {
@@ -220,7 +221,7 @@ namespace IR {
             arr.removeAt(0)
             addr = pulseToDigit(0, 15, 1600)
             command = pulseToDigit(16, 31, 1600)
-			command1 = command & 0x00ff
+			command1 = command && 0x00ff
             messageStr = convertNumToHexStr(addr, 4) + convertNumToHexStr(command, 4)
 			
             arr = [];
@@ -232,7 +233,7 @@ namespace IR {
             arr.removeAt(1)
             arr.removeAt(0)
             command = pulseToDigit(0, 11, 1300)
-			command1 = command & 0x00ff
+			command1 = command && 0x00ff
             messageStr = convertNumToHexStr(command, 3)
             arr = [];
             if (thereIsHandler) {
