@@ -18,7 +18,6 @@ namespace IR {
     let first = true
     let rec_Type = ""
     let messageStr = ""
-    let messagehh = 0
     let recPin = DigitalPin.P8
     let thereIsHandler = false
     arr = []
@@ -70,10 +69,10 @@ namespace IR {
      */
     //% blockId=sendMyMessage1 block="send message: %msg| ,%times| times, encoding type:%myType"
     //% weight=80 blockGap=10
-    export function sendMyMessage1(msg: number, times: number, myType: encodingType): void {
+    export function sendMyMessage1(msg: string, times: number, myType: encodingType): void {
         if (send_init) {
             //control.inBackground(() => {
-            sendMessage(msg, times, myType);
+            sendMessage(convertHexStrToNum(msg), times, myType);
             //})
         }
     }
@@ -209,6 +208,7 @@ namespace IR {
     function decodeIR() {
         let addr = 0
         let command = 0
+		let command1 = 0
         messageStr = ""
         rec_Type = ""
         for (let i = 0; i <= arr.length - 1 - 1; i++) {
@@ -220,7 +220,9 @@ namespace IR {
             arr.removeAt(0)
             addr = pulseToDigit(0, 15, 1600)
             command = pulseToDigit(16, 31, 1600)
+			command1 = command & 0x00ff
             messageStr = convertNumToHexStr(addr, 4) + convertNumToHexStr(command, 4)
+			
             arr = [];
             if (thereIsHandler) {
                 tempHandler();
@@ -230,6 +232,7 @@ namespace IR {
             arr.removeAt(1)
             arr.removeAt(0)
             command = pulseToDigit(0, 11, 1300)
+			command1 = command & 0x00ff
             messageStr = convertNumToHexStr(command, 3)
             arr = [];
             if (thereIsHandler) {
@@ -296,9 +299,8 @@ namespace IR {
      */
     //% blockId=getMessage block="the received IR message"
     //% weight=60 blockGap=10
-    export function getMessage(): number {
-        messagehh = convertHexStrToNum(messageStr)
-        return messagehh
+    export function getMessage(): string {
+        return command1
     }
 
 }
