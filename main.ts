@@ -299,7 +299,7 @@ namespace IR {
      */
     //% blockId=getMessage block="the received IR message"
     //% weight=60 blockGap=10
-    export function getMessage(): string {
+    export function getMessage(): number {
         return command1
     }
 
