@@ -1,11 +1,33 @@
 //% weight=0 color=#87bc4b icon="\uf1eb" block="InfraRed"
 namespace IR {
+
+    export enum Ports {
+        P0 = 0,
+        P1 = 1,
+        P2 = 2,
+        P8 = 3,
+        P12 = 4,
+        P16 = 5
+
+    }
+
+    const PortAnalog = [
+        AnalogPin.P0,
+        AnalogPin.P1,
+        AnalogPin.P2,
+        AnalogPin.P8,
+        AnalogPin.P12,
+        AnalogPin.P16
+    ]
+
+
+
     export enum encodingType {
         //% block="NEC"
-        NEC,
-        //% block="SONY"
-        SONY
+        NEC
+
     }
+
     let tempHandler: Action;
     let irLed = AnalogPin.P16;
     const pwmPeriod = 26;
@@ -18,7 +40,7 @@ namespace IR {
     let first = true
     let rec_Type = ""
     let messageStr = ""
-    let command1 = 0
+    let command1 =0
     let recPin = DigitalPin.P8
     let thereIsHandler = false
     arr = []
@@ -30,19 +52,7 @@ namespace IR {
         control.waitMicros(lowTime);
     }
 
-    /**
-     *  set the infrared LED pin.
-     */
-    //% blockId=setIR_pin block="set IR LED pin: %myPin" blockExternalInputs=false
-    //% weight=90 blockGap=10
-    //% myPin.fieldEditor="gridpicker" myPin.fieldOptions.columns=4
-    //% myPin.fieldOptions.tooltips="false" myPin.fieldOptions.width="300"
-    export function setIR_pin(myPin: AnalogPin) {
-        irLed = myPin;
-        pins.analogWritePin(irLed, 0);
-        pins.analogSetPeriod(irLed, pwmPeriod);
-        send_init = true;
-    }
+
 
     /**
      *  set the IR receiver pin.
@@ -68,27 +78,19 @@ namespace IR {
     /**
      * send message from IR LED. You must set the message encoding type, send how many times, and the message.
      */
-    //% blockId=sendMyMessage1 block="send message: %msg| ,%times| times, encoding type:%myType"
+    //% blockId=sendMyMessage1 block="send message: %msg| ,%times| times, encoding pin:%port"
     //% weight=80 blockGap=10
-    export function sendMyMessage1(msg: number, times: number, myType: encodingType): void {
+    export function sendMyMessage1(msg: number, times: number, port: Ports): void {
+
+        let portss = PortAnalog[port]
+        irLed = portss;
+        pins.analogWritePin(irLed, 0);
+        pins.analogSetPeriod(irLed, pwmPeriod);
+        send_init = true;
         if (send_init) {
             //control.inBackground(() => {
-            sendMessage(msg, times, myType);
+            sendMessage(msg, times, encodingType.NEC);
             //})
-        }
-    }
-    /**
-     * send message from IR LED. You must set the message encoding type, send how many times, and the message.
-     */
-    //% blockId=sendMyMessage2 block="send message: %msg| ,%times| times, encoding type:%myType"
-    //% weight=75 blockGap=10
-    export function sendMyMessage2(msg: string, times: number, myType: string): void {
-        if (send_init) {
-            if (myType == "NEC") {
-                sendMessage(convertHexStrToNum(msg), times, encodingType.NEC);
-            } else if (myType == "SONY") {
-                sendMessage(convertHexStrToNum(msg), times, encodingType.SONY);
-            }
         }
     }
 
@@ -133,53 +135,15 @@ namespace IR {
         }
     }
 
-    function sendSONY(message: number, times: number): void {
-        const enum SONY {
-            startHigh = 2300,
-            startLow = 500,
-            trueHigh = 1100,
-            trueLow = 500,
-            falseHigh = 500,
-            falseLow = 500,
-            interval = 45000
-        }
-        const MESSAGE_BITS = 12;
-        let startTime = 0;
-        let betweenTime = 0;
-        for (let sendCount = 0; sendCount < times; sendCount++) {
-            startTime = input.runningTimeMicros();
-            transmitBit(SONY.startHigh, SONY.startLow);
-            encode(message, 12, SONY.trueHigh, SONY.trueLow, SONY.falseHigh, SONY.falseLow);
-            betweenTime = input.runningTimeMicros() - startTime
-            if (times > 0)
-                control.waitMicros(SONY.interval - betweenTime);
-        }
-    }
 
     export function sendMessage(message: number, times: number, myType: encodingType): void {
         switch (myType) {
             case encodingType.NEC: sendNEC(message, times);
-            case encodingType.SONY: sendSONY(message, times);
+
             default: sendNEC(message, times);
         }
     }
 
-    function convertHexStrToNum(myMsg: string): number {
-        let myNum = 0
-        for (let i = 0; i < myMsg.length; i++) {
-            if ((myMsg.charCodeAt(i) > 47) && (myMsg.charCodeAt(i) < 58)) {
-                myNum += (myMsg.charCodeAt(i) - 48) * (16 ** (myMsg.length - 1 - i))
-            } else if ((myMsg.charCodeAt(i) > 96) && (myMsg.charCodeAt(i) < 103)) {
-                myNum += (myMsg.charCodeAt(i) - 87) * (16 ** (myMsg.length - 1 - i))
-            } else if ((myMsg.charCodeAt(i) > 64) && (myMsg.charCodeAt(i) < 71)) {
-                myNum += (myMsg.charCodeAt(i) - 55) * (16 ** (myMsg.length - 1 - i))
-            } else {
-                myNum = 0
-                break
-            }
-        }
-        return myNum
-    }
 
     //------------------receiver-------------
 
@@ -209,7 +173,7 @@ namespace IR {
     function decodeIR() {
         let addr = 0
         let command = 0
-
+        let command1 = 0
         messageStr = ""
         rec_Type = ""
         for (let i = 0; i <= arr.length - 1 - 1; i++) {
@@ -222,7 +186,6 @@ namespace IR {
             addr = pulseToDigit(0, 15, 1600)
             command = pulseToDigit(16, 31, 1600)
             command1 = command & 0x00ff
-            messageStr = convertNumToHexStr(addr, 4) + convertNumToHexStr(command, 4)
 
             arr = [];
             if (thereIsHandler) {
@@ -234,7 +197,6 @@ namespace IR {
             arr.removeAt(0)
             command = pulseToDigit(0, 11, 1300)
             command1 = command & 0x00ff
-            messageStr = convertNumToHexStr(command, 3)
             arr = [];
             if (thereIsHandler) {
                 tempHandler();
@@ -256,25 +218,7 @@ namespace IR {
         return myNum
     }
 
-    function convertNumToHexStr(myNum: number, digits: number): string {
-        let tempDiv = 0
-        let tempMod = 0
-        let myStr = ""
-        tempDiv = myNum
-        while (tempDiv > 0) {
-            tempMod = tempDiv % 16
-            if (tempMod > 9) {
-                myStr = String.fromCharCode(tempMod - 10 + 97) + myStr
-            } else {
-                myStr = tempMod + myStr
-            }
-            tempDiv = Math.idiv(tempDiv, 16)
-        }
-        while (myStr.length != digits) {
-            myStr = "0" + myStr
-        }
-        return myStr
-    }
+
 
     /**
      * Do something when a receive IR
@@ -284,15 +228,6 @@ namespace IR {
     export function onReceivedIR(handler: Action): void {
         tempHandler = handler
         thereIsHandler = true
-    }
-
-    /**
-     * return the encoding type of the received IR 
-     */
-    //% blockId=getRecType block="the received IR encoding type"
-    //% weight=60 blockGap=10
-    export function getRecType(): string {
-        return rec_Type
     }
 
     /**
