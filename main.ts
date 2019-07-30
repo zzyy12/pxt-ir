@@ -20,6 +20,15 @@ namespace IR {
         AnalogPin.P16
     ]
 
+    const PortDigital = [
+        DigitalPin.P0,
+        DigitalPin.P1,
+        DigitalPin.P2,
+        DigitalPin.P8,
+        DigitalPin.P12,
+        DigitalPin.P16
+
+    ]
 
 
     export enum encodingType {
@@ -54,26 +63,7 @@ namespace IR {
 
 
 
-    /**
-     *  set the IR receiver pin.
-     */
-    //% blockId=setREC_pin block="set IR receiver pin: %myPin" blockExternalInputs=false
-    //% weight=85 blockGap=10
-    //% myPin.fieldEditor="gridpicker" myPin.fieldOptions.columns=4
-    //% myPin.fieldOptions.tooltips="false" myPin.fieldOptions.width="300"
-    export function setREC_pin(myPin: DigitalPin) {
-        recPin = myPin;
-        pins.setEvents(recPin, PinEventType.Pulse)
-        pins.setPull(recPin, PinPullMode.PullUp)
-        pins.onPulsed(recPin, PulseValue.Low, function () {
-            arr.push(input.runningTimeMicros())
-        })
-        pins.onPulsed(recPin, PulseValue.High, function () {
-            arr.push(input.runningTimeMicros())
-        })
-        control.onEvent(recPin, DAL.MICROBIT_PIN_EVENT_ON_TOUCH, tempHandler);
-        rec_init = true;
-    }
+
 
     /**
      * send message from IR LED. You must set the message encoding type, send how many times, and the message.
@@ -219,22 +209,30 @@ namespace IR {
 
 
 
-    /**
-     * Do something when a receive IR
-     */
-    //% blockId=onReceivedIR block="on IR message received" blockInlineInputs=true
-    //% weight=70 blockGap=10
-    export function onReceivedIR(handler: Action): void {
-        tempHandler = handler
-        thereIsHandler = true
-    }
+
 
     /**
      * return the message of the received IR 
      */
-    //% blockId=getMessage block="the received IR message"
+    //% blockId=getMessage block="the received IR message pin: %myPin"
     //% weight=60 blockGap=10
-    export function getMessage(): number {
+    export function getMessage(handler: Action, myPin: Ports): number {
+        let portss = PortDigital[myPin]
+        recPin = portss;
+        pins.setEvents(recPin, PinEventType.Pulse)
+        pins.setPull(recPin, PinPullMode.PullUp)
+        pins.onPulsed(recPin, PulseValue.Low, function () {
+            arr.push(input.runningTimeMicros())
+        })
+        pins.onPulsed(recPin, PulseValue.High, function () {
+            arr.push(input.runningTimeMicros())
+        })
+        control.onEvent(recPin, DAL.MICROBIT_PIN_EVENT_ON_TOUCH, tempHandler);
+        rec_init = true;
+
+        tempHandler = handler
+        thereIsHandler = true
+
         return command1
     }
 
