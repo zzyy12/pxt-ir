@@ -216,7 +216,7 @@ namespace IR {
      */
     //% blockId=getMessage block="the received IR message pin: %myPin"
     //% weight=60 blockGap=10
-    export function getMessage(handler: Action, myPin: Ports): number {
+    export function getMessage( myPin: Ports): number {
         let portss = PortDigital[myPin]
         recPin = portss;
         pins.setEvents(recPin, PinEventType.Pulse)
@@ -230,7 +230,7 @@ namespace IR {
         control.onEvent(recPin, DAL.MICROBIT_PIN_EVENT_ON_TOUCH, tempHandler);
         rec_init = true;
 
-        tempHandler = handler
+
         thereIsHandler = true
 
         return command1
