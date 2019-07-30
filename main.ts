@@ -40,7 +40,7 @@ namespace IR {
     let first = true
     let rec_Type = ""
     let messageStr = ""
-    let command1 =0
+    let command1 = 0
     let recPin = DigitalPin.P8
     let thereIsHandler = false
     arr = []
@@ -173,7 +173,6 @@ namespace IR {
     function decodeIR() {
         let addr = 0
         let command = 0
-        let command1 = 0
         messageStr = ""
         rec_Type = ""
         for (let i = 0; i <= arr.length - 1 - 1; i++) {
